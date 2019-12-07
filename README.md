@@ -25,3 +25,9 @@ The script needs access to your ICloud and Google account. Run the authentiation
 ## Design
 
 The script is designed to be safe so that you can be sure all your photos have been transferred. The script uses some persistent storage to keep track of what it is doing. This means you may kill the script at any time and it will continue where it left off. It will even transfer photos that were uploaded to ICloud while the script was running. Concretely the script defines a number of workers that run in parallel and perform one specific task. The workers communicate via an sqlite database.
+
+```
+docker build . -t photos
+docker run -ti -v /home/mmeulemans/icloud-to-gcloud-photo-transfer/gcloud-client-secret.json:/opt/gcloud-client-secret.json -v /home/mmeulemans/storage:/data -w /opt photos pipenv run python /opt/authenticate.py
+```
+

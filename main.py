@@ -298,10 +298,14 @@ class GoogleAlbumAppender (DatabaseQueryWorker):
         count = 0
         c = self.db.cursor()
         for item in response['newMediaItemResults']:
-            if item['status']['message'] == 'OK':
+            if item['status']['message'] == 'OK' or item['status']['message'] == 'Success':
                 c.execute(f'UPDATE {ARTIFACTS_TABLE} SET album=1 WHERE uploaded=?',
                           (item['uploadToken'].encode('ascii'),))
                 count += 1
+            else:
+                self.logger.warn('Failed to append item to album, retrying', file=item['mediaItem']['description'])
+                c.execute(f'UPDATE {ARTIFACTS_TABLE} SET uploaded=NULL WHERE uploaded=?',
+                          (item['uploadToken'].encode('ascii'),))
         if count > 0:
             self.logger.info(f'Added {count} items to album')
 
@@ -314,7 +318,7 @@ class GoogleAlbumAppender (DatabaseQueryWorker):
                     self.album = album
                     self.logger.info('Found album', album=self.album['id'])
                     return
-            self.album = gphotos.albums().create(
+            self.album = self._gphotos.albums().create(
                 body={'album': {'title': self.title}}).execute()
             self.logger.info('Created album')
 

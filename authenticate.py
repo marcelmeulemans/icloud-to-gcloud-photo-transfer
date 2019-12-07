@@ -54,12 +54,17 @@ def authenticate_gcloud(folder):
 
     flow = client.OAuth2WebServerFlow(**client_info)
     storage = Storage(os.path.join(folder, 'gcloud.json'))
-    credentials = tools.run_flow(flow, storage)
+    class flags:
+        def __init__(self):
+            self.noauth_local_webserver = True
+            self.logging_level = 'ERROR' 
+    credentials = tools.run_flow(flow, storage, flags())
 
 
 def main():
     try:
-        folder = prepare_auth_folder()
+        #folder = prepare_auth_folder()
+        folder = os.getenv('AUTH_DIR')
         authenticate_icloud(folder)
         authenticate_gcloud(folder)
         print('Done')
